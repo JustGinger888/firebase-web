@@ -1,6 +1,21 @@
+// add admin cloud function
+const adminForm = document.querySelector('.admin-actions');
+adminForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const adminEmail = document.querySelector('#admin-email').value;
+  const addAdminRole = functions.httpsCallable('addAdminRole');
+
+  addAdminRole({email: adminEmail}).then(result => {
+    console.log(result);
+  });
+});
+
 // Listen for auth state change
-firebase.auth().onAuthStateChanged(user => {
+auth.onAuthStateChanged(user => {
     if (user) {
+      user.getIdTokenResult().then(getIdTokenResult => {
+        user.admin = getIdTokenResult.claims.admin;
+      });
       console.log('User logged in: ', user);
       db.collection("guides").onSnapshot(querySnapshot => {
         setupGuides(querySnapshot.docs);
@@ -44,7 +59,7 @@ signupForm.addEventListener('submit', (e) => {
 
   console.log(signupForm['signup-bio'].value)
 
-  
+
   //Sign Up the User
   auth.createUserWithEmailAndPassword(email, password).then(cred => {
     return db.collection('users').doc(cred.user.uid).set({
